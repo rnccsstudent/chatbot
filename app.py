@@ -1,15 +1,16 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Set up the Gemini API Key
+# Streamlit UI
 st.title("💬 Chatbot with Google Gemini")
 st.write(
     "This chatbot uses Google's Gemini API to generate responses. "
     "To use this app, you need to provide a Google Gemini API key, which you can get [here](https://aistudio.google.com/)."
 )
 
-# Ask user for their API key
+# Ask user for their Gemini API key
 gemini_api_key = st.text_input("Google Gemini API Key", type="password")
+
 if not gemini_api_key:
     st.info("Please add your Google Gemini API key to continue.", icon="🗝️")
 else:
@@ -28,21 +29,22 @@ else:
     # Chat input
     if prompt := st.chat_input("Ask me anything..."):
 
-        # Store and display the user message
+        # Store and display user message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Send request to Gemini API
+        # Generate response from Gemini API
         model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(prompt)
+
+        try:
+            response = model.generate_content(prompt)
+            bot_reply = response.text if hasattr(response, "text") else "⚠️ Sorry, I couldn't generate a response."
+
+        except Exception as e:
+            bot_reply = f"⚠️ Error: {str(e)}"
 
         # Display response
-        if response.text:
-            bot_reply = response.text
-        else:
-            bot_reply = "⚠️ Sorry, I couldn't generate a response."
-
         with st.chat_message("assistant"):
             st.markdown(bot_reply)
 
